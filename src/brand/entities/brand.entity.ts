@@ -3,8 +3,8 @@ import { ProductEntity } from 'src/product/entities/product.entity';
 import { PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Entity } from 'typeorm';
 
-@Entity('categories')
-export class CategoryEntity extends BaseEntity{
+@Entity('brands')
+export class BrandEntity extends BaseEntity{
 
     @Column({
         type: 'varchar',
@@ -19,6 +19,6 @@ export class CategoryEntity extends BaseEntity{
     })
     status: number;
 
-    @OneToMany(() => ProductEntity, (product) => product.category)
+    @OneToMany(() => ProductEntity, (product) => product.brand)
     products: ProductEntity[];
 }

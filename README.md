@@ -2,6 +2,7 @@
 
 *** generate resource ***
 nest g resource teen
+nest g resource 
 
 *** generate controller ***
 nest g controller product

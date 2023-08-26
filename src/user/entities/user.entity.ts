@@ -1,15 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { LevelEnum } from "../enums/level.enum";
+import { BaseEntity } from "src/common/entities/base.entity";
+import { BlogCommentEntity } from "src/blog_comments/entities/blog_comment.entity";
+import { BlogEntity } from "src/blog/entities/blog.entity";
+import { ProductCommentEntity } from "src/product_comments/entities/product_comment.entity";
 
 @Unique(["email"])
 @Unique(["username"])
 @Unique(["phone"])
 @Entity('users')
-export class User {
-    @PrimaryGeneratedColumn({
-        type: 'int',
-    })
-    id: number;
+export class User extends BaseEntity{
 
     @Column({
         type: 'varchar',
@@ -21,16 +21,14 @@ export class User {
     @Column({
         type: 'varchar',
         length: 255,
-        nullable: false,
-        unique: true
+        nullable: false
     })
     username: string;
 
     @Column({
         type: 'varchar',
         length: 255,
-        nullable: false,
-        unique: true
+        nullable: false
     })
     email: string;
 
@@ -44,8 +42,7 @@ export class User {
     @Column({
         type: 'varchar',
         length: 255,
-        nullable: false,
-        unique: true
+        nullable: false
     })
     phone: string;
 
@@ -69,4 +66,14 @@ export class User {
         enum: LevelEnum
     })
     level: string;
+
+
+    @OneToMany(() => BlogEntity, (blog) => blog.user)
+    blog: BlogEntity[];
+
+    @OneToMany(() => BlogCommentEntity, (blogCmt) => blogCmt.user)
+    blog_comments: BlogCommentEntity[];
+
+    @OneToMany(()=>ProductCommentEntity, (pro_cmt)=>pro_cmt.users)
+    pro_cmt: ProductCommentEntity[];
 }

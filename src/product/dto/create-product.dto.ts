@@ -5,31 +5,36 @@ export class CreateProductDTO {
     @IsNotEmpty()
     @MinLength(3)
     @Expose()
-    pro_name: string;
+    name: string;
 
     @IsNotEmpty()
     @MinLength(3)
     @Expose()
-    pro_slug: string;
+    content: string;
 
-    pro_image: string;
+    @IsNotEmpty()
+    @MinLength(3)
+    @Expose()
+    sku: string;
+
+    image: string;
 
     @IsNumber()
     @Min(1)
     @Type(() => Number)
     @Expose()
-    pro_price: number;
+    price: number;
 
     @Min(0)
     @Type(() => Number)
     @Expose()
-    pro_sale_price: number;
+    sale_price: number;
 
     @IsNotEmpty()
     @Expose()
-    pro_status: number;
+    status: number;
 
     @Expose()
-    pro_description: string;
+    description: string;
 
 };

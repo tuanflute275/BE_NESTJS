@@ -1,36 +1,40 @@
 import { Expose, Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, Min, MinLength } from "class-validator";
+
 export class UpdateProductDTO {
     @IsNotEmpty()
     @MinLength(3)
     @Expose()
-    pro_name: string;
+    name: string;
 
     @IsNotEmpty()
     @MinLength(3)
     @Expose()
-    pro_slug: string;
+    content: string;
 
+    @IsNotEmpty()
+    @MinLength(3)
     @Expose()
-    pro_image: string;
+    sku: string;
+
+    image: string;
 
     @IsNumber()
     @Min(1)
     @Type(() => Number)
     @Expose()
-    pro_price: number;
+    price: number;
 
     @Min(0)
     @Type(() => Number)
     @Expose()
-    pro_sale_price: number;
+    sale_price: number;
 
     @IsNotEmpty()
     @Expose()
-    pro_status: number;
+    status: number;
 
     @Expose()
-    pro_description: string;
+    description: string;
 
-    categoryId: number;
 };

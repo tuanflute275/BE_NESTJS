@@ -16,6 +16,16 @@ import { UploadModule } from './upload/upload.module';
 import * as Joi from '@hapi/joi';
 import { ExceptionsLoggerFilter } from './ultils/exceptionsLogger.filter';
 import { APP_FILTER } from '@nestjs/core';
+import { BrandModule } from './brand/brand.module';
+import { BrandEntity } from './brand/entities/brand.entity';
+import { ProductCommentsModule } from './product_comments/product_comments.module';
+import { BlogModule } from './blog/blog.module';
+import { BlogCommentsModule } from './blog_comments/blog_comments.module';
+import { BlogEntity } from './blog/entities/blog.entity';
+import { BlogCommentEntity } from './blog_comments/entities/blog_comment.entity';
+import { OrderDetailEntity } from './order-details/entities/order-detail.entity';
+import { OrderEntity } from './order/entities/order.entity';
+import { ProductCommentEntity } from './product_comments/entities/product_comment.entity';
 
 @Module({
   imports: [
@@ -33,7 +43,13 @@ import { APP_FILTER } from '@nestjs/core';
       entities: [
         User,
         CategoryEntity,
-        ProductEntity
+        BrandEntity,
+        BlogEntity,
+        BlogCommentEntity,
+        OrderEntity,
+        OrderDetailEntity,
+        ProductEntity,
+        ProductCommentEntity,
       ],
       autoLoadEntities: true,
       synchronize: true,
@@ -48,6 +64,10 @@ import { APP_FILTER } from '@nestjs/core';
     OrderDetailsModule,
     AuthModule,
     UploadModule,
+    BrandModule,
+    ProductCommentsModule,
+    BlogModule,
+    BlogCommentsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -58,4 +78,4 @@ import { APP_FILTER } from '@nestjs/core';
     }
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,67 +1,73 @@
+import { BrandEntity } from 'src/brand/entities/brand.entity';
 import { CategoryEntity } from 'src/category/entities/category.entity';
-import { PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { BaseEntity } from 'src/common/entities/base.entity';
+import { OrderDetailEntity } from 'src/order-details/entities/order-detail.entity';
+import { ProductCommentEntity } from 'src/product_comments/entities/product_comment.entity';
+import { Column, ManyToOne, OneToMany } from 'typeorm';
 import { Entity } from 'typeorm';
 
 @Entity('products')
-export class ProductEntity {
-    @PrimaryGeneratedColumn({
-        type: 'int',
-    })
-    id: number;
+export class ProductEntity extends BaseEntity {
 
     @Column({
         type: 'varchar',
         length: 255,
         nullable: false,
     })
-    pro_name: string;
-
-    @Column({
-        type: 'varchar',
-        length: 255,
-        nullable: false,
-    })
-    pro_slug: string;
+    name: string;
 
     @Column({
         type: 'text',
         nullable: false,
     })
-    pro_image: string;
+    content: string;
+
+    @Column({
+        type: 'varchar',
+        nullable: false,
+    })
+    image: string;
+
+    @Column({
+        type: 'varchar',
+        nullable: false,
+    })
+    sku: string;
 
     @Column({
         type: 'float',
         nullable: false,
     })
-    pro_price: number;
+    price: number;
 
     @Column({
         type: 'float',
         nullable: true,
         default: 0,
     })
-    pro_sale_price: number;
+    sale_price: number;
 
     @Column({
         type: 'tinyint',
         default: 1,
     })
-    pro_status: number;
+    status: number;
 
     @Column({
         type: 'text',
     })
-    pro_description: string;
+    description: string;
 
     @ManyToOne(() => CategoryEntity, (cate) => cate.products)
     category?: CategoryEntity;
 
-    // @ManyToOne(() => RestaurantEntity, (restaurant) => restaurant.products)
-    // restaurant: RestaurantEntity;
+    @ManyToOne(() => BrandEntity, (brand) => brand.products)
+    brand?: BrandEntity;
 
-    // @OneToMany(() => OrderDeatailsEntity, (order_detail) => order_detail.product)
-    // order_details: OrderDeatailsEntity[];
+    @OneToMany(() => ProductCommentEntity, (pro_cmt) => pro_cmt.products)
+    pro_comments: ProductCommentEntity[];
 
-    // @OneToMany(() => Cart, (cart) => cart.product)
-    // carts: Cart[];
+    @OneToMany(()=>OrderDetailEntity,(ord_detail)=>ord_detail.products)
+    ord_details: OrderDetailEntity[];
+
 }

@@ -1,3 +1,5 @@
+import { Paging } from "./Paging";
+
 export class Response {
     readonly status: number;
     readonly message: string;
@@ -5,7 +7,7 @@ export class Response {
     readonly paging?: any;
     readonly code?: number;
 
-    constructor(status: number, data: any, message?: string, paging?: any, code?: number){
+    constructor(status: number, data: any, message?: string, paging?: Paging, code?: number){
         this.status = status;
         this.message = message || 'Success';
         this.data = data;
