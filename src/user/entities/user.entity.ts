@@ -6,10 +6,9 @@ import { BlogEntity } from "src/blog/entities/blog.entity";
 import { ProductCommentEntity } from "src/product_comments/entities/product_comment.entity";
 
 @Unique(["email"])
-@Unique(["username"])
 @Unique(["phone"])
 @Entity('users')
-export class User extends BaseEntity{
+export class User extends BaseEntity {
 
     @Column({
         type: 'varchar',
@@ -17,13 +16,6 @@ export class User extends BaseEntity{
         nullable: false,
     })
     name: string;
-
-    @Column({
-        type: 'varchar',
-        length: 255,
-        nullable: false
-    })
-    username: string;
 
     @Column({
         type: 'varchar',
@@ -49,14 +41,16 @@ export class User extends BaseEntity{
     @Column({
         type: 'varchar',
         length: 255,
-        nullable: false,
+        nullable: true,
+        default: null
     })
-    address: string;
+    refresh_token: string;
 
     @Column({
         type: 'varchar',
         length: 255,
-        nullable: false,
+        nullable: true,
+        default: null
     })
     avatar: string;
 
@@ -74,6 +68,6 @@ export class User extends BaseEntity{
     @OneToMany(() => BlogCommentEntity, (blogCmt) => blogCmt.user)
     blog_comments: BlogCommentEntity[];
 
-    @OneToMany(()=>ProductCommentEntity, (pro_cmt)=>pro_cmt.users)
+    @OneToMany(() => ProductCommentEntity, (pro_cmt) => pro_cmt.users)
     pro_cmt: ProductCommentEntity[];
 }

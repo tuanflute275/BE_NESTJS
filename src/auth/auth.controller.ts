@@ -1,11 +1,10 @@
 import { AuthService } from './auth.service';
 import { Controller, Post, UseGuards, Request, Get, HttpStatus, HttpException, Body } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { LocalAuthGuard } from './local-auth.guard';
-import { JwtAuthGuard } from './jwt-auth.guard';
 import RegisterDto from './dto/Register.dto';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'src/common/response/Response';
+import LoginDto from './dto/Login.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -17,7 +16,7 @@ export class AuthController {
     public async register(@Body() registrationData: RegisterDto) {
         const hashedPassword = await bcrypt.hash(registrationData.password, 10);
         try {
-            const createUser = await this.authService.create({
+            const createUser = await this.authService.register({
                 ...registrationData,
                 password: hashedPassword
             });
@@ -27,25 +26,15 @@ export class AuthController {
         }
     }
 
-    @UseGuards(LocalAuthGuard)
+    // @UseGuards(LocalAuthGuard)
     @Post('login')
-    async login(@Request() req) {
-        return this.authService.login(req.user);
+    async login(@Body() loginDto: LoginDto): Promise<any> {
+        return this.authService.login(loginDto);
     }
 
-
-    @UseGuards(JwtAuthGuard)
-    @Get('logout')
-    logout(@Request() req) {
-        let { id, user } = req.user;
-        return this.authService.logOut(id);
+    @Post('refresh-token')
+    async refreshToken(@Body() { refresh_token }): Promise<any> {
+        return await this.authService.refreshToken(refresh_token);
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Get('profile')
-    async getProfile(@Request() req) {
-        let { id, user } = req.user;
-        const data = await this.authService.showUser(id);
-        return data;
-    }
 }

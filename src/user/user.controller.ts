@@ -1,51 +1,98 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request, Query, Req, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { User } from './entities/user.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Response } from 'src/common/response/Response';
+import { FilterUserDto } from './dto/filter-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { storageConfig } from 'src/common/helpers/config';
+import { extname } from 'path';
 
 @Controller('user')
 @ApiTags('user')
-
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @UseGuards(JwtAuthGuard)
-  @Put('update')
-  async updateInfo(
-    @Request() req,
-    @Body() userUpdate :any
-  ) {
-    const {id, user} = req.user;
-    return await this.userService.updateInfo(id, userUpdate)
+  @UseGuards(AuthGuard)
+  @Get()
+  async findAll(@Query() query: FilterUserDto): Promise<User[]> {
+    console.log(query)
+    return await this.userService.findAll(query);
   }
 
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<User> {
+    return await this.userService.findOne(+id);
+  }
 
+  @UseGuards(AuthGuard)
+  @Post()
+  async create(@Body() createDto: CreateUserDto): Promise<User> {
+    return await this.userService.create(createDto);
+  }
 
-  // async updateUserData(
-  //   @Req() req: Request,
-  //   @Param('userID') userID: string,
-  //   @Body() userData: UpdateUserDto,
-  //   @UploadedFile()
-  //   image: Express.Multer.File,
-  // ): Promise<UpdateResult> {
-  //   const user_found = await this.userService.findById(userID);
-  //   console.log('user_found', user_found);
-  //   let avatar_name = user_found.avatar;
-  //   if (image && user_found.avatar != '') {
-  //     const filePath = user_found.avatar.replace(
-  //       'http://localhost:8000/uploads/',
-  //       '',
-  //     );
-  //     unlinkSync('./src/public/uploads/' + filePath);
-  //     avatar_name = `http://${req.get('host')}/uploads/${image.filename}`;
-  //   }
-  //   if (image && user_found.avatar == '') {
-  //     avatar_name = `http://${req.get('host')}/uploads/${image.filename}`;
-  //   }
-  //   // console.log('User Data In Controller: ', userData);
-  //   userData.avatar = avatar_name;
-  //   return await this.userService.update(userID, userData);
-  // }
+  @UseGuards(AuthGuard)
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateDto: UpdateUserDto) {
+    await this.userService.update(+id, updateDto);
+    return new Response(200)
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async sortDelete(@Param('id') id: number) {
+    await this.userService.softDelete(+id);
+    return new Response(200, 'delete success')
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('recover/:id')
+  async reStore(@Param('id') id: number) {
+    await this.userService.reStore(+id);
+    return new Response(200, 'restore success')
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('delete/:id')
+  async delete(@Param('id') id: number) {
+    await this.userService.reStore(+id);
+    return new Response(200, 'delete official success')
+  }
+
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('avatar', { 
+    storage: storageConfig('avatar') ,
+    fileFilter: (req, file, cb) => {
+      const ext = extname(file.originalname);
+      const allowedExtArr = ['.jpg', '.png', '.jpeg'];
+      if(!allowedExtArr.includes(ext)){
+        req.fileValidationError = `Wrong extension type. Accepted file ext are: ${allowedExtArr.toString()}`
+        cb(null, false);
+      }else{
+        const fileSize = parseInt(req.headers['content-length']);
+        if(fileSize > 1024 * 1024 * 5){
+          req.fileValidationError = `File size is too large. Accepted file is less than 5MB`;
+          cb(null, false);
+        }else{
+          cb(null, true);
+        }
+      }
+    }
+  }))
+  @Post('upload-avatar')
+  async uploadAvatar(@Req() req: any, @UploadedFile() file: Express.Multer.File) {
+    // console.log('user data', req.user_data) // khi verify token đã lấy ra 
+    if(req.fileValidationError){
+      throw new BadRequestException(req.fileValidationError);
+    }
+    if(!file){
+      throw new BadRequestException('File is required')
+    }
+    await this.userService.updateAvatar(req.user_data.id, file.destination + '/' + file.filename);
+    return new Response(200, 'uploads avatar success')
+  }
 }

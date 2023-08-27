@@ -4,50 +4,58 @@ import { UserService } from 'src/user/user.service';
 import { jwtConstants } from './constants';
 import RegisterDto from './dto/Register.dto';
 import * as bcrypt from 'bcrypt';
-import { UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/user/entities/user.entity';
+import LoginDto from './dto/Login.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private usersService: UserService,
-        private jwtService: JwtService
+        private readonly usersService: UserService,
+        private jwtService: JwtService,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>
+
     ) { }
 
-    async validateUser(username: string, pass: string): Promise<any> {
-        const user = await this.usersService.findByUsername(username);
+    async login(loginDto: LoginDto): Promise<any> {
+        const user = await this.usersService.findByEmail(loginDto.email);
         if (user) {
-            const isMatchPassword = await bcrypt.compare(pass, user.password);
-            if (isMatchPassword === true) {
-                const { password, ...result } = user;
-                return result;
+            const checkPass = bcrypt.compareSync(loginDto.password, (await user).password);
+            if (!checkPass) {
+                throw new HttpException("Password is not correct", HttpStatus.UNAUTHORIZED);
             }
-            throw new HttpException(`${pass} không chính xác`, HttpStatus.INTERNAL_SERVER_ERROR);
+            //generate access_token and refresh_token
+            const payload = { id: (await user).id, name: (await user).name, email: (await user).email };
+            return this.generateToken(payload);
         }
-        throw new HttpException(`${username} không tồn tại`, HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(`Email is not exits`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    async login(user: any) {
-        const payload = { username: user.phone, sub: user.id };
-        return {
-            access_token: this.jwtService.sign(payload, { expiresIn: '2360d', secret: jwtConstants.secret }),
-        }
-    }
-
-    async logOut(userId: number) {
-        console.log('userId', userId)
-
-        return this.usersService.update(userId, {
-            access_token: null,
+    private async generateToken(payload: { id: number, email: string }) {
+        const access_token = await this.jwtService.signAsync(payload, {
+            secret: jwtConstants.secret,
+            expiresIn: jwtConstants.access_token_time
         });
+        const refresh_token = await this.jwtService.signAsync(payload, {
+            secret: jwtConstants.secret,
+            expiresIn: jwtConstants.refresh_token_time
+        });
+        await this.userRepository.update(
+            { email: payload.email },
+            { refresh_token: refresh_token }
+        )
+        return {
+            access_token,
+            refresh_token
+        }
     }
 
-    async create(userDto: RegisterDto) {
+
+    async register(userDto: RegisterDto): Promise<User> {
 
         //check unique
-        const checkUsername = await this.usersService.findByUsername(userDto.username);
-        if (checkUsername) {
-            throw new HttpException(`${userDto.username} đã tồn tại`, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
 
         const checkEmail = await this.usersService.findByEmail(userDto.email);
         if (checkEmail) {
@@ -59,14 +67,23 @@ export class AuthService {
             throw new HttpException(`${userDto.phone} đã tồn tại`, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        const user = await this.usersService.register(userDto);
-        if (user) {
-            return await this.login(user);
-        }
-        throw new HttpException('Error create user', HttpStatus.INTERNAL_SERVER_ERROR);
+        return await this.userRepository.save({ ...userDto, refresh_token: "refresh_token_string" });
     }
 
-    async showUser(id: number) {
-        return await this.usersService.findById(id);
+    async refreshToken(refresh_token: string): Promise<any> {
+        try {
+            const verify = await this.jwtService.verifyAsync(refresh_token, {
+                secret: jwtConstants.secret,
+            });
+            const checkExitsToken = await this.userRepository.findOneBy({ email: verify.email, refresh_token })
+            if (checkExitsToken) {
+                return this.generateToken({ id: verify.id, email: verify.email })
+            } else {
+                throw new HttpException("Refresh token is not valid", HttpStatus.BAD_REQUEST);
+            }
+        } catch (error) {
+            throw new HttpException("Refresh token is not valid", HttpStatus.BAD_REQUEST);
+        }
     }
+
 }

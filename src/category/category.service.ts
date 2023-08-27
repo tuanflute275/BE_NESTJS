@@ -16,27 +16,43 @@ export class CategoryService {
   }
 
   async create(createCategoryDto: CreateCategoryDto) {
-    return await 'This action adds a new category';
+    return this.categoryRepository.save(createCategoryDto);
   }
 
-  async findAll(): Promise<CategoryEntity[]> {
-    return await this.categoryRepository.find();
+  async findAll(paging: any, filters: any) {
+    let condition: any = {};
+    if(filters.name) condition.name = filters.name;
+    if(filters.status) condition.status = filters.status;
+
+    return await this.categoryRepository.findAndCount({
+      where: condition,
+      take: paging.page_size,
+      skip: (paging.page - 1)
+    });
   }
+
+  // async findAll(): Promise<CategoryEntity[]>{
+  //   return await this.categoryRepository.find();
+  // }
 
   async findOne(id: number): Promise<CategoryEntity> {
     return await this.categoryRepository.findOne({
-      // relations: {
-      //   restaurant: true,
-      // },
       where: { id: id },
     });
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return await `This action updates a #${id} category`;
+    return await this.categoryRepository.update(id, updateCategoryDto);
   }
 
-  async remove(id: number): Promise<DeleteResult> {
+  async softDelete(id: number) {
+    return this.categoryRepository.softDelete(id);
+  }
+
+  async reStore(id: number): Promise<DeleteResult> {
+    return this.categoryRepository.restore(id);
+  }
+  async delete(id: number): Promise<DeleteResult> {
     return this.categoryRepository.delete(id);
   }
 }

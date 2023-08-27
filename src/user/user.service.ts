@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Like, Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 import RegisterDto from 'src/auth/dto/Register.dto';
+import * as bcrypt from 'bcrypt';
+import { FilterUserDto } from './dto/filter-user.dto';
 
 @Injectable()
 export class UserService {
@@ -12,10 +14,10 @@ export class UserService {
   @InjectRepository(User)
   private readonly userRepository: Repository<User>
 
-  async findByUsername(username: string) {
+  async findByName(name: string) {
     return await this.userRepository.findOne({
       where: {
-        username: username
+        name: name
       }
     });
   }
@@ -43,37 +45,66 @@ export class UserService {
       }
     });
   }
-
-  async updateInfo(id: number, userUpdate: any) {
-    console.log(userUpdate, id);
-    await this.userRepository.update(id, userUpdate);
-    return await this.findById(id);
+  
+  async updateAvatar(id: number, avatar: string): Promise<UpdateResult> {
+    return await this.userRepository.update(id, { avatar })
   }
 
-  async register(userRegister: RegisterDto) {
-    const newData = await this.userRepository.create(userRegister);
-    return await this.userRepository.save(newData);
+  //
+
+  async findAll(query: FilterUserDto): Promise<any> {
+    const items_per_page = Number(query.items_per_page) || 10;
+    const page = Number(query.page) || 1;
+    const skip = (page - 1) * items_per_page;
+    const keyword = query.search || "";
+    const [res, total] = await this.userRepository.findAndCount({
+      where: [
+        { name: Like('%' + keyword + '%') },
+        { email: Like('%' + keyword + '%') },
+      ],
+      take: items_per_page,
+      skip: skip
+    });
+    const lastPage = Math.ceil(total / items_per_page);
+    const nextPage = page + 1 > lastPage ? null : page + 1;
+    const prevPage = page - 1 < 1 ? null : page - 1;
+
+    return {
+      data: res,
+      total,
+      currentPage: page,
+      nextPage,
+      prevPage,
+      lastPage
+    }
   }
 
-
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ) {
-    console.log('id UserService', id)
-    console.log('updateUserDto UserService', updateUserDto)
-    // return await this.userRepository.findOne({
-    //   where: {
-    //     id: id
-    //   }
-    // });
-
-    // console.log('userdataaaa', userData)
-
-    // return await this.userRepository.update(id, updateUserDto);
+  async findOne(id: number): Promise<User> {
+    return this.userRepository.findOne({
+      where: {
+        id: id
+      }
+    })
   }
 
-  async remove(id: string): Promise<DeleteResult> {
-    return await this.userRepository.delete(+id);
+  async create(createDto: CreateUserDto): Promise<User> {
+    console.log('createDto', createDto)
+    const hashPassword = await bcrypt.hash(createDto.password, 10)
+    return await this.userRepository.save(createDto);
+  }
+
+  async update(id: number, updateDto: UpdateUserDto): Promise<UpdateResult> {
+    return this.userRepository.update(id, updateDto);
+  }
+
+  async softDelete(id: number) {
+    return this.userRepository.softDelete(id);
+  }
+
+  async reStore(id: number): Promise<DeleteResult> {
+    return this.userRepository.restore(id);
+  }
+  async delete(id: number): Promise<DeleteResult> {
+    return this.userRepository.delete(id);
   }
 }

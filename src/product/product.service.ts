@@ -41,6 +41,6 @@ export class ProductService {
 
   async remove(id: number) {
     const deleted = await this.productRepository.delete(id);
-    return new Response(200, deleted, 'delete success');
+    return new Response(200, 'delete success', deleted);
   }
 }

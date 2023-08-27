@@ -7,7 +7,7 @@ export class Response {
     readonly paging?: any;
     readonly code?: number;
 
-    constructor(status: number, data: any, message?: string, paging?: Paging, code?: number){
+    constructor(status: number, message?: string, data?: any, paging?: Paging, code?: number) {
         this.status = status;
         this.message = message || 'Success';
         this.data = data;
