@@ -1,55 +1,42 @@
-import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, HttpStatus, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDTO } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { Response } from 'src/common/response/Response';
-import { Paging } from 'src/common/response/Paging';
-
-
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('product')
 @ApiTags('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
-
+  @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createProductDto: CreateProductDTO) {
-    try {
-      return this.productService.create(createProductDto);
-    } catch (e) {
-      return e.response?.data;
-    }
+  async create(@Body() createProductDTO: CreateProductDTO): Promise<CreateProductDTO> {
+    return await this.productService.create(createProductDTO);
   }
 
 
-  @Get()
-  async findAll() {
-    const paging = {
-      page: 1,
-      page_size: 5
-    }
-    const [listProduct, totalPage] = await this.productService.findAll(paging);
-    const pagingRes = new Paging(paging.page, paging.page_size, totalPage);
-    return new Response(200, 'success', listProduct, pagingRes)
+  @UseGuards(AuthGuard)
+  async findAll(){
+    return await this.productService.findAll();
   }
 
-
+  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.productService.findOne(+id);
   }
 
-
+  @UseGuards(AuthGuard)
   @Put(':id')
-  update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDTO) {
-    return this.productService.update(+id, updateProductDto);
+  async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDTO) {
+    return await this.productService.update(+id, updateProductDto);
   }
 
-
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.productService.remove(+id);
+  async delete(@Param('id') id: number) {
+    return await this.productService.delete(+id);
   }
 }

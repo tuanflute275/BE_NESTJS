@@ -4,7 +4,7 @@ import { PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Entity } from 'typeorm';
 
 @Entity('brands')
-export class BrandEntity extends BaseEntity{
+export class BrandEntity extends BaseEntity {
 
     @Column({
         type: 'varchar',
@@ -12,12 +12,6 @@ export class BrandEntity extends BaseEntity{
         nullable: false,
     })
     name: string;
-
-    @Column({
-        type: 'tinyint',
-        default: 1,
-    })
-    status: number;
 
     @OneToMany(() => ProductEntity, (product) => product.brand)
     products: ProductEntity[];

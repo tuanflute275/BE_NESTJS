@@ -1,15 +1,14 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request, Query, Req, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Req, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { Response } from 'src/common/response/Response';
-import { FilterUserDto } from './dto/filter-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'src/common/helpers/config';
 import { extname } from 'path';
+import { Request } from 'express';
 
 @Controller('user')
 @ApiTags('user')
@@ -18,9 +17,32 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get()
-  async findAll(@Query() query: FilterUserDto): Promise<User[]> {
-    console.log(query)
-    return await this.userService.findAll(query);
+  async findAll(@Req() request: Request) {
+
+    const builder = this.userService.queryBuilder('users');
+
+    //filter
+    if (request.query.name) {
+      let name = request.query.name;
+      builder.andWhere(`name LIKE '%${name}%'`);
+    }
+
+    //sort
+    if (request.query._sort) {
+      let sortString = request.query._sort;
+      let sort_arr = sortString.toString().split('-');
+      builder.orderBy(sort_arr[0], sort_arr[1] == 'ASC' ? 'ASC' : 'DESC');
+    }
+
+    // paginate
+    if (request.query.page || request.query.limit) {
+      const page: number = parseInt(request.query.page as any) || 1;
+      const perPage: number = parseInt(request.query.limit as any) || 1;
+
+      builder.offset((page - 1) * perPage).limit(perPage);
+    }
+
+    return await builder.getMany();
   }
 
   @UseGuards(AuthGuard)
@@ -38,29 +60,13 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateDto: UpdateUserDto) {
-    await this.userService.update(+id, updateDto);
-    return new Response(200)
+    return await this.userService.update(+id, updateDto);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id')
-  async sortDelete(@Param('id') id: number) {
-    await this.userService.softDelete(+id);
-    return new Response(200, 'delete success')
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('recover/:id')
-  async reStore(@Param('id') id: number) {
-    await this.userService.reStore(+id);
-    return new Response(200, 'restore success')
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('delete/:id')
   async delete(@Param('id') id: number) {
-    await this.userService.reStore(+id);
-    return new Response(200, 'delete official success')
+    return await this.userService.delete(+id);
   }
 
   @UseGuards(AuthGuard)
@@ -92,7 +98,6 @@ export class UserController {
     if(!file){
       throw new BadRequestException('File is required')
     }
-    await this.userService.updateAvatar(req.user_data.id, file.destination + '/' + file.filename);
-    return new Response(200, 'uploads avatar success')
+    return await this.userService.updateAvatar(req.user_data.id, file.destination + '/' + file.filename);
   }
 }

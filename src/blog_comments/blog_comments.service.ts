@@ -1,26 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBlogCommentDto } from './dto/create-blog_comment.dto';
 import { UpdateBlogCommentDto } from './dto/update-blog_comment.dto';
+import { BlogCommentEntity } from './entities/blog_comment.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class BlogCommentsService {
-  create(createBlogCommentDto: CreateBlogCommentDto) {
-    return 'This action adds a new blogComment';
+
+  @InjectRepository(BlogCommentEntity)
+  private readonly blogCmtRepository: Repository<BlogCommentEntity>
+
+  queryBuilder(query: string) {
+    return this.blogCmtRepository.createQueryBuilder(query);
   }
 
-  findAll() {
-    return `This action returns all blogComments`;
+  async create(createBlogCommentDto: CreateBlogCommentDto): Promise<CreateBlogCommentDto> {
+    return this.blogCmtRepository.save(createBlogCommentDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} blogComment`;
+  async findAll(): Promise<BlogCommentEntity[]>{
+    return await this.blogCmtRepository.find();
   }
 
-  update(id: number, updateBlogCommentDto: UpdateBlogCommentDto) {
-    return `This action updates a #${id} blogComment`;
+  async findOne(id: number): Promise<BlogCommentEntity> {
+    return await this.blogCmtRepository.findOne({
+      where: { id: id }
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} blogComment`;
+  async update(id: number, updateBlogCmtDto: UpdateBlogCommentDto): Promise<UpdateResult> {
+    return await this.blogCmtRepository.update(id, updateBlogCmtDto);
+  }
+
+  async delete(id: number): Promise<DeleteResult> {
+    return this.blogCmtRepository.delete(id);
   }
 }

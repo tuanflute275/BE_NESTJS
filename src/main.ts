@@ -1,10 +1,8 @@
 
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import { ExceptionsLoggerFilter } from './ultils/exceptionsLogger.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,10 +13,6 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe());
-
-
-  const { httpAdapter } = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new ExceptionsLoggerFilter(httpAdapter));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('API with NestJS')
@@ -31,7 +25,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 8000;
 
   await app.listen(port, () => {
     console.log(`http://localhost:${port}/api`);

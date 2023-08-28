@@ -25,12 +25,6 @@ export class BlogEntity extends BaseEntity {
         type: 'text',
         nullable: false,
     })
-    category: string;
-
-    @Column({
-        type: 'text',
-        nullable: false,
-    })
     content: string;
 
     @OneToMany(() => BlogCommentEntity, (blogCmt) => blogCmt.blog)

@@ -12,9 +12,6 @@ import { User } from './user/entities/user.entity';
 import { CategoryEntity } from './category/entities/category.entity';
 import { ProductEntity } from './product/entities/product.entity';
 import { AuthModule } from './auth/auth.module';
-import { UploadModule } from './upload/upload.module';
-import * as Joi from '@hapi/joi';
-import { ExceptionsLoggerFilter } from './ultils/exceptionsLogger.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { BrandModule } from './brand/brand.module';
 import { BrandEntity } from './brand/entities/brand.entity';
@@ -63,7 +60,6 @@ import { ProductCommentEntity } from './product_comments/entities/product_commen
     OrderModule,
     OrderDetailsModule,
     AuthModule,
-    UploadModule,
     BrandModule,
     ProductCommentsModule,
     BlogModule,
@@ -72,10 +68,6 @@ import { ProductCommentEntity } from './product_comments/entities/product_commen
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_FILTER,
-      useClass: ExceptionsLoggerFilter
-    }
   ],
 })
 export class AppModule { }

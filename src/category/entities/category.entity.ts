@@ -13,12 +13,6 @@ export class CategoryEntity extends BaseEntity{
     })
     name: string;
 
-    @Column({
-        type: 'tinyint',
-        default: 1,
-    })
-    status: number;
-
     @OneToMany(() => ProductEntity, (product) => product.category)
     products: ProductEntity[];
 }

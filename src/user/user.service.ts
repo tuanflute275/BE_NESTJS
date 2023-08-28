@@ -2,17 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Like, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
-import RegisterDto from 'src/auth/dto/Register.dto';
 import * as bcrypt from 'bcrypt';
-import { FilterUserDto } from './dto/filter-user.dto';
 
 @Injectable()
 export class UserService {
 
   @InjectRepository(User)
   private readonly userRepository: Repository<User>
+  
+  queryBuilder(query: string) {
+    return this.userRepository.createQueryBuilder(query);
+  }
 
   async findByName(name: string) {
     return await this.userRepository.findOne({
@@ -50,33 +52,8 @@ export class UserService {
     return await this.userRepository.update(id, { avatar })
   }
 
-  //
-
-  async findAll(query: FilterUserDto): Promise<any> {
-    const items_per_page = Number(query.items_per_page) || 10;
-    const page = Number(query.page) || 1;
-    const skip = (page - 1) * items_per_page;
-    const keyword = query.search || "";
-    const [res, total] = await this.userRepository.findAndCount({
-      where: [
-        { name: Like('%' + keyword + '%') },
-        { email: Like('%' + keyword + '%') },
-      ],
-      take: items_per_page,
-      skip: skip
-    });
-    const lastPage = Math.ceil(total / items_per_page);
-    const nextPage = page + 1 > lastPage ? null : page + 1;
-    const prevPage = page - 1 < 1 ? null : page - 1;
-
-    return {
-      data: res,
-      total,
-      currentPage: page,
-      nextPage,
-      prevPage,
-      lastPage
-    }
+  async findAll(): Promise<User[]>{
+    return await this.userRepository.find();
   }
 
   async findOne(id: number): Promise<User> {
@@ -96,14 +73,7 @@ export class UserService {
   async update(id: number, updateDto: UpdateUserDto): Promise<UpdateResult> {
     return this.userRepository.update(id, updateDto);
   }
-
-  async softDelete(id: number) {
-    return this.userRepository.softDelete(id);
-  }
-
-  async reStore(id: number): Promise<DeleteResult> {
-    return this.userRepository.restore(id);
-  }
+  
   async delete(id: number): Promise<DeleteResult> {
     return this.userRepository.delete(id);
   }

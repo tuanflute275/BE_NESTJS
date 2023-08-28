@@ -69,5 +69,4 @@ export class ProductEntity extends BaseEntity {
 
     @OneToMany(()=>OrderDetailEntity,(ord_detail)=>ord_detail.products)
     ord_details: OrderDetailEntity[];
-
 }

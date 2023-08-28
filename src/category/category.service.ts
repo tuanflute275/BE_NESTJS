@@ -15,29 +15,17 @@ export class CategoryService {
     return this.categoryRepository.createQueryBuilder(query);
   }
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto): Promise<CreateCategoryDto> {
     return this.categoryRepository.save(createCategoryDto);
   }
 
-  async findAll(paging: any, filters: any) {
-    let condition: any = {};
-    if(filters.name) condition.name = filters.name;
-    if(filters.status) condition.status = filters.status;
-
-    return await this.categoryRepository.findAndCount({
-      where: condition,
-      take: paging.page_size,
-      skip: (paging.page - 1)
-    });
+  async findAll(): Promise<CategoryEntity[]>{
+    return await this.categoryRepository.find();
   }
-
-  // async findAll(): Promise<CategoryEntity[]>{
-  //   return await this.categoryRepository.find();
-  // }
 
   async findOne(id: number): Promise<CategoryEntity> {
     return await this.categoryRepository.findOne({
-      where: { id: id },
+      where: { id: id }
     });
   }
 
@@ -45,13 +33,6 @@ export class CategoryService {
     return await this.categoryRepository.update(id, updateCategoryDto);
   }
 
-  async softDelete(id: number) {
-    return this.categoryRepository.softDelete(id);
-  }
-
-  async reStore(id: number): Promise<DeleteResult> {
-    return this.categoryRepository.restore(id);
-  }
   async delete(id: number): Promise<DeleteResult> {
     return this.categoryRepository.delete(id);
   }

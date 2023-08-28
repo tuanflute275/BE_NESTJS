@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
+import { BrandEntity } from './entities/brand.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class BrandService {
-  create(createBrandDto: CreateBrandDto) {
-    return 'This action adds a new brand';
+  @InjectRepository(BrandEntity)
+  private readonly brandRepository: Repository<BrandEntity>
+
+  queryBuilder(query: string) {
+    return this.brandRepository.createQueryBuilder(query);
   }
 
-  findAll() {
-    return `This action returns all brand`;
+  async create(createBrandDto: CreateBrandDto): Promise<CreateBrandDto> {
+    return this.brandRepository.save(createBrandDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} brand`;
+  async findAll(): Promise<BrandEntity[]>{
+    return await this.brandRepository.find();
   }
 
-  update(id: number, updateBrandDto: UpdateBrandDto) {
-    return `This action updates a #${id} brand`;
+  async findOne(id: number): Promise<BrandEntity> {
+    return await this.brandRepository.findOne({
+      where: { id: id }
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} brand`;
+  async update(id: number, updateBrandDto: UpdateBrandDto): Promise<UpdateResult> {
+    return await this.brandRepository.update(id, updateBrandDto);
+  }
+
+  async delete(id: number): Promise<DeleteResult> {
+    return this.brandRepository.delete(id);
   }
 }

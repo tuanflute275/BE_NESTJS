@@ -1,26 +1,43 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductCommentDto } from './dto/create-product_comment.dto';
 import { UpdateProductCommentDto } from './dto/update-product_comment.dto';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { ProductCommentEntity } from './entities/product_comment.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ProductCommentsService {
-  create(createProductCommentDto: CreateProductCommentDto) {
-    return 'This action adds a new productComment';
+
+  @InjectRepository(ProductCommentEntity)
+  private readonly productCommentRepository: Repository<ProductCommentEntity>
+
+  queryBuilder(query: string) {
+    return this.productCommentRepository.createQueryBuilder(query);
   }
 
-  findAll() {
-    return `This action returns all productComments`;
+  async create(createProductCommentDto: CreateProductCommentDto): Promise<CreateProductCommentDto> {
+    return this.productCommentRepository.save(createProductCommentDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} productComment`;
+  async findAll() {
+    return await this.productCommentRepository.find({
+      relations: {
+        users: true,
+      }
+    });
   }
 
-  update(id: number, updateProductCommentDto: UpdateProductCommentDto) {
-    return `This action updates a #${id} productComment`;
+  async findOne(id: number): Promise<ProductCommentEntity> {
+    return await this.productCommentRepository.findOne({
+      where: { id: id }
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productComment`;
+  async update(id: number, updateProCmtDto: UpdateProductCommentDto): Promise<UpdateResult> {
+    return await this.productCommentRepository.update(id, updateProCmtDto);
+  }
+
+  async delete(id: number): Promise<DeleteResult> {
+    return this.productCommentRepository.delete(id);
   }
 }
