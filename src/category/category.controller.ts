@@ -18,6 +18,12 @@ export class CategoryController {
   }
 
   @UseGuards(AuthGuard)
+  @Get()
+  async findAll(){
+    return await this.categoryService.findAll();
+  }
+
+  @UseGuards(AuthGuard)
   @Get('query')
   async query(@Req() request: Request) {
 
@@ -48,11 +54,6 @@ export class CategoryController {
 
     console.log(builder.getQuery());
     return await builder.getMany();
-  }
-
-  @UseGuards(AuthGuard)
-  async findAll(){
-    return await this.categoryService.findAll();
   }
 
   @UseGuards(AuthGuard)

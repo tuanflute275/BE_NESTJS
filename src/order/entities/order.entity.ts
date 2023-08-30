@@ -1,9 +1,10 @@
 import { BaseEntity } from "src/common/entities/base.entity";
 import { OrderDetailEntity } from "src/order-details/entities/order-detail.entity";
-import { Column, Entity, OneToMany } from "typeorm";
+import { User } from "src/user/entities/user.entity";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 
 @Entity('orders')
-export class OrderEntity extends BaseEntity{
+export class OrderEntity extends BaseEntity {
     @Column({
         type: 'varchar',
         length: 255,
@@ -69,6 +70,9 @@ export class OrderEntity extends BaseEntity{
     // @OneToMany(() => ProductEntity, (product) => product.category)
     // products: ProductEntity[];
 
-    @OneToMany(()=>OrderDetailEntity, (ord_details)=>ord_details.order)
-    orderDetails: OrderDetailEntity[] ;
+    @ManyToOne(() => User, (user) => user.orders)
+    user: User;
+
+    @OneToMany(() => OrderDetailEntity, (ord_details) => ord_details.order)
+    orderDetails: OrderDetailEntity[];
 }

@@ -6,7 +6,6 @@ export class CreateBlogDto {
     @Expose()
     title: string;
 
-    @IsNotEmpty()
     @Expose()
     image: string;
 

@@ -31,5 +31,5 @@ export class BlogEntity extends BaseEntity {
     Blog_comments: BlogCommentEntity[];
 
     @ManyToOne(() => User, (user) => user.blog)
-    user?: User;
+    user: User;
 }

@@ -4,6 +4,7 @@ import { BaseEntity } from "src/common/entities/base.entity";
 import { BlogCommentEntity } from "src/blog_comments/entities/blog_comment.entity";
 import { BlogEntity } from "src/blog/entities/blog.entity";
 import { ProductCommentEntity } from "src/product_comments/entities/product_comment.entity";
+import { OrderEntity } from "src/order/entities/order.entity";
 
 @Unique(["email"])
 @Unique(["phone"])
@@ -61,6 +62,8 @@ export class User extends BaseEntity {
     })
     level: string;
 
+    @OneToMany(() => OrderEntity, (order) => order.user)
+    orders: OrderEntity[];
 
     @OneToMany(() => BlogEntity, (blog) => blog.user)
     blog: BlogEntity[];

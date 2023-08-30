@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { BlogEntity } from './entities/blog.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class BlogService {
-
+  @InjectRepository(User)
+  private readonly userRepository: Repository<User>
   @InjectRepository(BlogEntity)
   private readonly blogRepository: Repository<BlogEntity>
 
@@ -15,11 +17,26 @@ export class BlogService {
     return this.blogRepository.createQueryBuilder(query);
   }
 
-  async create(createBlogDto: CreateBlogDto): Promise<CreateBlogDto> {
-    return this.blogRepository.save(createBlogDto);
+  async create(userId: number, createBlogDto: CreateBlogDto) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId }
+    });
+
+    console.log(user);
+
+    try {
+      const res = await this.blogRepository.save({
+        ...createBlogDto, user
+      })
+      return await this.blogRepository.findOne({
+        where: { id: res.id }
+      });
+    } catch (error) {
+      throw new HttpException("Can not create blog", HttpStatus.BAD_REQUEST);
+    }
   }
 
-  async findAll(): Promise<BlogEntity[]>{
+  async findAll(): Promise<BlogEntity[]> {
     return await this.blogRepository.find();
   }
 
