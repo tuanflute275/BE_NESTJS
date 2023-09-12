@@ -9,7 +9,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 @Controller('brand')
 @ApiTags('brand')
 export class BrandController {
-  constructor(private readonly brandService: BrandService) {}
+  constructor(private readonly brandService: BrandService) { }
 
   @UseGuards(AuthGuard)
   @Post()
@@ -48,7 +48,8 @@ export class BrandController {
   }
 
   @UseGuards(AuthGuard)
-  async findAll(){
+  @Get()
+  async findAll() {
     return await this.brandService.findAll();
   }
 

@@ -1,4 +1,5 @@
 import { BrandEntity } from 'src/brand/entities/brand.entity';
+import { Cart } from 'src/cart/entities/cart.entity';
 import { CategoryEntity } from 'src/category/entities/category.entity';
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { OrderDetailEntity } from 'src/order-details/entities/order-detail.entity';
@@ -29,12 +30,6 @@ export class ProductEntity extends BaseEntity {
     image: string;
 
     @Column({
-        type: 'varchar',
-        nullable: false,
-    })
-    sku: string;
-
-    @Column({
         type: 'float',
         nullable: false,
     })
@@ -63,6 +58,9 @@ export class ProductEntity extends BaseEntity {
 
     @ManyToOne(() => BrandEntity, (brand) => brand.products)
     brand?: BrandEntity;
+
+    @OneToMany(() => Cart, (cart) => cart.product)
+    cart: Cart[];
 
     @OneToMany(() => ProductCommentEntity, (pro_cmt) => pro_cmt.products)
     pro_comments: ProductCommentEntity[];

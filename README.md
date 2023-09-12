@@ -4,14 +4,6 @@
 nest g resource teen
 nest g resource 
 
-*** generate controller ***
-nest g controller product
-nest g controller category
-nest g controller user
-nest g controller transaction
-nest g controller order
-nest g controller article
-nest g controller menu
 
 *** npm i mysql ***
 npm install --save @nestjs/typeorm typeorm mysql2
@@ -43,7 +35,6 @@ npm i --save-dev @types/passport-jwt
 
 # upload and update image user 
 npm i @types/multer
-
 
 # register user 
 npm i @types/bcrypt bcrypt

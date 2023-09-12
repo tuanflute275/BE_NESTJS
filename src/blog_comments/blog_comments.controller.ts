@@ -13,8 +13,9 @@ export class BlogCommentsController {
 
   @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() createBlogCommentDto: CreateBlogCommentDto) {
-    return await this.blogCommentsService.create(createBlogCommentDto);
+  async create(@Req() req: any, @Body() createBlogCommentDto: CreateBlogCommentDto) {
+    let user = req['user_data'];
+    return await this.blogCommentsService.create(user?.id, createBlogCommentDto);
   }
 
   @UseGuards(AuthGuard)

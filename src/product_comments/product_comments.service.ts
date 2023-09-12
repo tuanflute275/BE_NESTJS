@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateProductCommentDto } from './dto/create-product_comment.dto';
 import { UpdateProductCommentDto } from './dto/update-product_comment.dto';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { ProductCommentEntity } from './entities/product_comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class ProductCommentsService {
 
+  @InjectRepository(ProductCommentEntity)
+  @InjectRepository(User)
+  private readonly userRepository: Repository<User>
   @InjectRepository(ProductCommentEntity)
   private readonly productCommentRepository: Repository<ProductCommentEntity>
 
@@ -15,8 +19,24 @@ export class ProductCommentsService {
     return this.productCommentRepository.createQueryBuilder(query);
   }
 
-  async create(createProductCommentDto: CreateProductCommentDto): Promise<CreateProductCommentDto> {
-    return this.productCommentRepository.save(createProductCommentDto);
+
+  async create(userId: number, createProductCommentDto: CreateProductCommentDto) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId }
+    });
+
+    console.log(user);
+
+    try {
+      const res = await this.productCommentRepository.save({
+        ...createProductCommentDto, user
+      })
+      return await this.productCommentRepository.findOne({
+        where: { id: res.id }
+      });
+    } catch (error) {
+      throw new HttpException("Can not create blog", HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findAll() {

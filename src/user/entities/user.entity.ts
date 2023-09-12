@@ -5,6 +5,7 @@ import { BlogCommentEntity } from "src/blog_comments/entities/blog_comment.entit
 import { BlogEntity } from "src/blog/entities/blog.entity";
 import { ProductCommentEntity } from "src/product_comments/entities/product_comment.entity";
 import { OrderEntity } from "src/order/entities/order.entity";
+import { Cart } from "src/cart/entities/cart.entity";
 
 @Unique(["email"])
 @Unique(["phone"])
@@ -73,4 +74,7 @@ export class User extends BaseEntity {
 
     @OneToMany(() => ProductCommentEntity, (pro_cmt) => pro_cmt.users)
     pro_cmt: ProductCommentEntity[];
+
+    @OneToMany(() => Cart, (cart) => cart.user)
+    cart: Cart[];
 }

@@ -15,7 +15,7 @@ import { Request } from 'express';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get()
   async findAll(@Req() request: Request) {
 
@@ -45,25 +45,25 @@ export class UserController {
     return await builder.getMany();
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<User> {
     return await this.userService.findOne(+id);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Post()
   async create(@Body() createDto: CreateUserDto): Promise<User> {
     return await this.userService.create(createDto);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateDto: UpdateUserDto) {
     return await this.userService.update(+id, updateDto);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: number) {
     return await this.userService.delete(+id);
@@ -89,9 +89,8 @@ export class UserController {
       }
     }
   }))
-  @Post('upload-avatar')
+  // @Post('upload-avatar')
   async uploadAvatar(@Req() req: any, @UploadedFile() file: Express.Multer.File) {
-    // console.log('user data', req.user_data) // khi verify token đã lấy ra 
     if(req.fileValidationError){
       throw new BadRequestException(req.fileValidationError);
     }

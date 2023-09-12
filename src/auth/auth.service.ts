@@ -27,7 +27,7 @@ export class AuthService {
                 throw new HttpException("Password is not correct", HttpStatus.UNAUTHORIZED);
             }
             //generate access_token and refresh_token
-            const payload = { id: (await user).id, name: (await user).name, email: (await user).email };
+            const payload = { id: (await user).id, name: (await user).name, email: (await user).email, level: user.level };
             return this.generateToken(payload);
         }
         throw new HttpException(`Email is not exits`, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -51,7 +51,6 @@ export class AuthService {
             refresh_token
         }
     }
-
 
     async register(userDto: RegisterDto): Promise<User> {
 

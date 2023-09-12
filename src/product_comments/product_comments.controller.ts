@@ -13,8 +13,9 @@ export class ProductCommentsController {
 
   @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createProductCommentDto: CreateProductCommentDto) {
-    return this.productCommentsService.create(createProductCommentDto);
+  create(@Req() req: any, @Body() createProductCommentDto: CreateProductCommentDto) {
+    let user = req['user_data'];
+    return this.productCommentsService.create(user?.id, createProductCommentDto);
   }
 
   @UseGuards(AuthGuard)

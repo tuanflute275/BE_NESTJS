@@ -12,11 +12,6 @@ export class CreateProductDTO {
     @Expose()
     content: string;
 
-    @IsNotEmpty()
-    @MinLength(3)
-    @Expose()
-    sku: string;
-
     image: string;
 
     @IsNumber()

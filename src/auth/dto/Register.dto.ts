@@ -19,6 +19,7 @@ class RegisterDto {
     @IsNotEmpty()
     @MinLength(6)
     password: string;
+
 }
 
 export default RegisterDto;

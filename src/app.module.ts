@@ -23,9 +23,22 @@ import { BlogCommentEntity } from './blog_comments/entities/blog_comment.entity'
 import { OrderDetailEntity } from './order-details/entities/order-detail.entity';
 import { OrderEntity } from './order/entities/order.entity';
 import { ProductCommentEntity } from './product_comments/entities/product_comment.entity';
+import { CartModule } from './cart/cart.module';
+import { HeartModule } from './heart/heart.module';
+import { Cart } from './cart/entities/cart.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASS
+        }
+      }
+    }),
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
@@ -47,6 +60,7 @@ import { ProductCommentEntity } from './product_comments/entities/product_commen
         OrderDetailEntity,
         ProductEntity,
         ProductCommentEntity,
+        Cart
       ],
       autoLoadEntities: true,
       synchronize: true,
@@ -64,6 +78,8 @@ import { ProductCommentEntity } from './product_comments/entities/product_commen
     ProductCommentsModule,
     BlogModule,
     BlogCommentsModule,
+    CartModule,
+    HeartModule,
   ],
   controllers: [AppController],
   providers: [

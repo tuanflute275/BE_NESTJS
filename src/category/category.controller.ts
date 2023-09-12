@@ -11,19 +11,19 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) { }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto): Promise<CreateCategoryDto> {
     return await this.categoryService.create(createCategoryDto);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get()
   async findAll(){
     return await this.categoryService.findAll();
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get('query')
   async query(@Req() request: Request) {
 
@@ -56,19 +56,19 @@ export class CategoryController {
     return await builder.getMany();
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: number) {
     return await this.categoryService.findOne(+id);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateCategoryDto: UpdateCategoryDto) {
     return await this.categoryService.update(+id, updateCategoryDto);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: number) {
     return await this.categoryService.delete(+id);
